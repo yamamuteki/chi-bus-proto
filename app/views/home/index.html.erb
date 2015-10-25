@@ -1,7 +1,11 @@
 <%= form_tag "/bus_stops", method: :get, remote: true, id: "find_bus_stops" do %>
-	<%= text_field_tag :name %>
-	<%= submit_tag "検索" %>
+	<div class="input-group">
+		<%= text_field_tag :name, "", class: "form-control", placeholder: "バス停名を入力してください" %>
+		<span class="input-group-btn">
+			<%= submit_tag "検索", class: "btn btn-default" %>
+		</span>
+	</div>
 <% end %>
-
+<p></p>
 <div id="result">
 </div>
