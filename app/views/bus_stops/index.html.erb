@@ -1,3 +1,8 @@
 <% @bus_stops.each do |bus_stop| %>
 	<p><%= bus_stop.gml_id %>：<%= bus_stop.name %></p>
+	<ol>
+	  <% bus_stop.bus_route_informations.each do |info| %>
+		  <li><%= info.operation_company %>：<%= info.line_name %>：<%= info.bus_type %></li>
+	  <% end %>
+  </ol>
 <% end %>
