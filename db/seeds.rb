@@ -10,17 +10,27 @@ require 'rexml/document'
 
 doc = REXML::Document.new(open("db/P11-10_12-jgd-g.xml"))
 
-doc.elements.each('ksj:Dataset/ksj:BusStop') do | element |
+hash = {}
 
-  name = element.elements['ksj:busStopName'].text
-  gml_id = element.attributes['gml:id']
-  bus_stop = BusStop.create(name: name, gml_id: gml_id)
-  
-  element.elements.each('.//ksj:BusRouteInformation') do | info |
-    bus_type = info.elements['ksj:busType'].text.to_i
-    operation_company = info.elements['ksj:busOperationCompany'].text
-    line_name = info.elements['ksj:busLineName'].text
-    bus_stop.bus_route_informations.create(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
+doc.elements.each('ksj:Dataset/gml:Point') do | element |
+  puts point_id = element.attributes['gml:id']
+  hash[point_id] = element.elements['gml:pos'].text
+end
+
+ActiveRecord::Base.transaction do
+  doc.elements.each('ksj:Dataset/ksj:BusStop') do | element |
+    name = element.elements['ksj:busStopName'].text
+    puts gml_id = element.attributes['gml:id']
+    point_id = element.elements['ksj:position/@xlink:href'].value.tr '#', ''
+    pos = hash[point_id]
+
+    bus_stop = BusStop.create(name: name, gml_id: gml_id, latitude: pos.split[0], longitude: pos.split[1] )
+    
+    element.elements.each('.//ksj:BusRouteInformation') do | info |
+      bus_type = info.elements['ksj:busType'].text.to_i
+      operation_company = info.elements['ksj:busOperationCompany'].text
+      line_name = info.elements['ksj:busLineName'].text
+      bus_stop.bus_route_informations.create(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
+    end
   end
-
 end
