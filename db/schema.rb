@@ -11,13 +11,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151026134929) do
+ActiveRecord::Schema.define(version: 20151027162455) do
 
   create_table "bus_route_informations", force: true do |t|
     t.integer  "bus_type"
     t.string   "operation_company"
     t.string   "line_name"
     t.integer  "bus_stop_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "bus_routes", force: true do |t|
+    t.string   "gml_id"
+    t.integer  "bus_type"
+    t.string   "operation_company"
+    t.string   "line_name"
+    t.float    "weekday_rate"
+    t.float    "saturday_rate"
+    t.float    "holiday_rate"
+    t.string   "note"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

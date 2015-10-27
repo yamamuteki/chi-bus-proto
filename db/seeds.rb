@@ -34,3 +34,29 @@ ActiveRecord::Base.transaction do
     end
   end
 end
+
+doc_route = REXML::Document.new(open("db/N07-11_12.xml"))
+
+ActiveRecord::Base.transaction do
+  doc_route.elements.each('ksj:Dataset/ksj:BusRoute') do | element |
+    puts gml_id = element.attributes['gml:id']
+    bus_type = element.elements['ksj:bsc'].text.to_i
+    operation_company = element.elements['ksj:boc'].text
+    line_name = element.elements['ksj:bln'].text
+    weekday_rate = element.elements['ksj:rpd'].text
+    saturday_rate = element.elements['ksj:rps'].text
+    holiday_rate = element.elements['ksj:rph'].text
+    note = element.elements['ksj:rmk'].text
+
+    bus_route = BusRoute.create(
+      gml_id: gml_id,
+      bus_type: bus_type,
+      operation_company: operation_company,
+      line_name: line_name,
+      weekday_rate: weekday_rate,
+      saturday_rate: saturday_rate,
+      holiday_rate: holiday_rate,
+      note: note
+    )
+  end
+end
