@@ -8,6 +8,7 @@ gem 'sqlite3', group: [:development, :test]
 gem 'pg', group: :production
 
 # Use SCSS for stylesheets
+gem 'bootstrap-sass', '~> 3.3.5'
 gem 'sass-rails', '~> 4.0.3'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
@@ -39,8 +40,3 @@ gem 'spring',        group: :development
 
 # Use debugger
 # gem 'debugger', group: [:development, :test]
-
-gem 'therubyracer' # javascript runtime。lessをコンパイルするために必要
-gem 'less-rails' # Railsでlessを使えるようにする。Bootstrapがlessで書かれているため
-gem 'twitter-bootstrap-rails' # Bootstrapの本体
-
