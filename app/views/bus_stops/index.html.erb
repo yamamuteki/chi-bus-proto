@@ -1,7 +1,1 @@
-<% if @bus_stops.any? then %>
-	<%= render @bus_stops %>
-<% elsif params[:name].blank? %>
-	<p><%= "バス停名を入力してください。" %></p>
-<% else %>
-	<p><%= "名前に「#{params[:name]}」が含まれるバス停はありません。" %></p>
-<% end %>
+<%= render @bus_stops %>
