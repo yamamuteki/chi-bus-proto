@@ -5,7 +5,7 @@ namespace :chibus do
     puts "BusRouteInformation.count", BusRouteInformation.count
     puts "BusRoute.count", BusRoute.count
 
-    puts "BusRouteInformation.group(:operation_company, :line_name).count", BusRouteInformation.group(:operation_company, :line_name).count.keys.count
-    puts "BusRoute.group(:operation_company, :line_name).count", BusRoute.group(:operation_company, :line_name).count.keys.count
+    puts "BusRouteInformation.group(:bus_type, :operation_company, :line_name).count", BusRouteInformation.group(:bus_type, :operation_company, :line_name).count.keys.count
+    puts "BusRoute.group(:bus_type, :operation_company, :line_name).count", BusRoute.group(:bus_type, :operation_company, :line_name).count.keys.count
   end
 end
