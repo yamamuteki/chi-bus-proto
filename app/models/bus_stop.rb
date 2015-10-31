@@ -1,3 +1,3 @@
 class BusStop < ActiveRecord::Base
-  has_many :bus_route_informations
+  has_and_belongs_to_many :bus_route_informations
 end

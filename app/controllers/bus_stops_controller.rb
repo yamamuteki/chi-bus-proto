@@ -4,7 +4,7 @@ class BusStopsController < ApplicationController
 
     if @bus_stop_search.valid? then
       like = "%#{@bus_stop_search.keyword}%"
-      @bus_stops = BusStop.where('name like ?', like).limit(100).includes(:bus_route_informations)
+      @bus_stops = BusStop.where('name like ?', like).limit(10).includes({bus_route_informations: [:bus_stops]})
       respond_to do | format |
         format.html { render :layout => nil }
         format.json { render json: @bus_stops }

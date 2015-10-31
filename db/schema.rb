@@ -11,15 +11,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151027162455) do
+ActiveRecord::Schema.define(version: 20151031101121) do
 
-  create_table "bus_route_informations", force: true do |t|
+  create_table "bus_Route_informations", force: true do |t|
     t.integer  "bus_type"
     t.string   "operation_company"
     t.string   "line_name"
-    t.integer  "bus_stop_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "bus_route_informations_stops", id: false, force: true do |t|
+    t.integer "bus_stop_id"
+    t.integer "bus_route_information_id"
   end
 
   create_table "bus_routes", force: true do |t|

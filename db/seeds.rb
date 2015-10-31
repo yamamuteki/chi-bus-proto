@@ -17,6 +17,8 @@ doc.elements.each('ksj:Dataset/gml:Point') do | element |
   hash[point_id] = element.elements['gml:pos'].text
 end
 
+bus_route_info_hash = {}
+
 ActiveRecord::Base.transaction do
   doc.elements.each('ksj:Dataset/ksj:BusStop') do | element |
     name = element.elements['ksj:busStopName'].text
@@ -30,7 +32,11 @@ ActiveRecord::Base.transaction do
       bus_type = info.elements['ksj:busType'].text.to_i
       operation_company = info.elements['ksj:busOperationCompany'].text
       line_name = info.elements['ksj:busLineName'].text
-      bus_stop.bus_route_informations.create(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
+
+      bus_route_information = bus_route_info_hash[[bus_type, operation_company, line_name]] || BusRouteInformation.new(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
+      bus_route_info_hash[[bus_type, operation_company, line_name]] = bus_route_information
+
+      bus_stop.bus_route_informations << bus_route_information
     end
   end
 end
