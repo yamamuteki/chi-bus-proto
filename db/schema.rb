@@ -13,7 +13,7 @@
 
 ActiveRecord::Schema.define(version: 20151031101121) do
 
-  create_table "bus_Route_informations", force: true do |t|
+  create_table "bus_route_informations", force: true do |t|
     t.integer  "bus_type"
     t.string   "operation_company"
     t.string   "line_name"
