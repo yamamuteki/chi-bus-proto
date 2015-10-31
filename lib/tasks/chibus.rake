@@ -1,4 +1,5 @@
 namespace :chibus do
+  desc "Chi-bus utilities"
   task count: :environment do
     puts "BusStop.count", BusStop.count
     puts "BusRouteInformation.count", BusRouteInformation.count
