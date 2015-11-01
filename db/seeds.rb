@@ -43,6 +43,8 @@ end
 
 doc_route = REXML::Document.new(open("db/N07-11_12.xml"))
 
+bus_route_hash = {}
+
 ActiveRecord::Base.transaction do
   doc_route.elements.each('ksj:Dataset/ksj:BusRoute') do | element |
     puts gml_id = element.attributes['gml:id']
@@ -54,15 +56,20 @@ ActiveRecord::Base.transaction do
     holiday_rate = element.elements['ksj:rph'].text
     note = element.elements['ksj:rmk'].text
 
-    bus_route = BusRoute.create(
-      gml_id: gml_id,
-      bus_type: bus_type,
-      operation_company: operation_company,
-      line_name: line_name,
-      weekday_rate: weekday_rate,
-      saturday_rate: saturday_rate,
-      holiday_rate: holiday_rate,
-      note: note
-    )
+    bus_route = bus_route_hash[[bus_type, operation_company, line_name]] || 
+      BusRoute.create(
+        gml_id: gml_id,
+        bus_type: bus_type,
+        operation_company: operation_company,
+        line_name: line_name,
+        weekday_rate: weekday_rate,
+        saturday_rate: saturday_rate,
+        holiday_rate: holiday_rate,
+        note: note
+      )
+    bus_route_hash[[bus_type, operation_company, line_name]] = bus_route
+
+    bus_route_information = bus_route_info_hash[[bus_type, operation_company, line_name]] || BusRouteInformation.new(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
+    bus_route_information.bus_route = bus_route if bus_route_information
   end
 end
