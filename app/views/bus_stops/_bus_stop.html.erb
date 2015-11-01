@@ -10,9 +10,9 @@
 		  	<%= info.line_name %>
 		  	<%= info.bus_type_label %>
 		  	停留所数<%= info.bus_stops.length %>
-		  	平日<%= info.bus_route.weekday_rate %>
-		  	土曜<%= info.bus_route.saturday_rate %>
-		  	日祝<%= info.bus_route.holiday_rate %>
+		  	平日<%= info.bus_route.weekday_rate == 0 ? "なし" : info.bus_route.weekday_rate %>
+		  	土曜<%= info.bus_route.saturday_rate == 0 ? "なし" : info.bus_route.saturday_rate %>
+		  	日祝<%= info.bus_route.holiday_rate == 0 ? "なし" : info.bus_route.holiday_rate %>
 		  </li>
 	  <% end %>
 	</ol>
