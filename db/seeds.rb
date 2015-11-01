@@ -58,7 +58,6 @@ ActiveRecord::Base.transaction do
 
     bus_route = bus_route_hash[[bus_type, operation_company, line_name]] || 
       BusRoute.create(
-        gml_id: gml_id,
         bus_type: bus_type,
         operation_company: operation_company,
         line_name: line_name,
