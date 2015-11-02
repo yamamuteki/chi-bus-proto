@@ -2,7 +2,7 @@ class CreateBusRouteTracks < ActiveRecord::Migration
   def change
     create_table :bus_route_tracks do |t|
       t.string :gml_id
-      t.string :coordinates
+      t.text :coordinates
       t.references :bus_route
 
       t.timestamps

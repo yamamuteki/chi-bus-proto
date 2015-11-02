@@ -28,7 +28,7 @@ ActiveRecord::Schema.define(version: 20151102133711) do
 
   create_table "bus_route_tracks", force: true do |t|
     t.string   "gml_id"
-    t.string   "coordinates"
+    t.text     "coordinates"
     t.integer  "bus_route_id"
     t.datetime "created_at"
     t.datetime "updated_at"
