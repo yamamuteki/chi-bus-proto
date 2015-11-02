@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151101123118) do
+ActiveRecord::Schema.define(version: 20151102133711) do
 
   create_table "bus_route_informations", force: true do |t|
     t.integer  "bus_type"
@@ -24,6 +24,14 @@ ActiveRecord::Schema.define(version: 20151101123118) do
   create_table "bus_route_informations_stops", id: false, force: true do |t|
     t.integer "bus_stop_id"
     t.integer "bus_route_information_id"
+  end
+
+  create_table "bus_route_tracks", force: true do |t|
+    t.string   "gml_id"
+    t.string   "coordinates"
+    t.integer  "bus_route_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "bus_routes", force: true do |t|

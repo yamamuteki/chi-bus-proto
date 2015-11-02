@@ -13,6 +13,7 @@
 		  	平日<%= info.bus_route.weekday_rate == 0 ? "なし" : info.bus_route.weekday_rate %>
 		  	土曜<%= info.bus_route.saturday_rate == 0 ? "なし" : info.bus_route.saturday_rate %>
 		  	日祝<%= info.bus_route.holiday_rate == 0 ? "なし" : info.bus_route.holiday_rate %>
+			  記録<%= info.bus_route.bus_route_tracks.length %>
 		  </li>
 	  <% end %>
 	</ol>
