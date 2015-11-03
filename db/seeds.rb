@@ -8,6 +8,7 @@
 
 require 'rexml/document'
 require 'objspace'
+require 'pp'
 
 def load_bus_stops_and_bus_route_informations
   doc_bus_stops = REXML::Document.new(open("db/P11-10_12-jgd-g.xml"))
@@ -15,13 +16,15 @@ def load_bus_stops_and_bus_route_informations
   point_hash = {}
 
   doc_bus_stops.elements.each('ksj:Dataset/gml:Point') do | element |
-    puts point_id = element.attributes['gml:id']
+    point_id = element.attributes['gml:id']
     point_hash[point_id] = element.elements['gml:pos'].text
+    print '.'
   end
+  puts
 
   doc_bus_stops.elements.each('ksj:Dataset/ksj:BusStop') do | element |
     name = element.elements['ksj:busStopName'].text
-    puts gml_id = element.attributes['gml:id']
+    gml_id = element.attributes['gml:id']
     point_id = element.elements['ksj:position/@xlink:href'].value.remove '#'
     pos = point_hash[point_id]
 
@@ -32,19 +35,18 @@ def load_bus_stops_and_bus_route_informations
       operation_company = info.elements['ksj:busOperationCompany'].text
       line_name = info.elements['ksj:busLineName'].text
 
-      BusRouteInformation.uncached do
-        bus_route_information = BusRouteInformation.find_or_create_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
-        bus_stop.bus_route_informations << bus_route_information if bus_route_information
-      end
+      BusRouteInformation.find_or_create_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name).bus_stops << bus_stop
     end
+    print '.'
   end
+  puts
 end
 
 def load_bus_route_tracks_and_bus_routes
   doc_routes = REXML::Document.new(open("db/N07-11_12.xml"))
 
   doc_routes.elements.each('ksj:Dataset/gml:Curve') do | element |
-    puts curve_id = element.attributes['gml:id']
+    curve_id = element.attributes['gml:id']
     point_list = element.elements['gml:segments/gml:LineStringSegment/gml:posList'].text.strip
 
     coordinates = []
@@ -54,10 +56,12 @@ def load_bus_route_tracks_and_bus_routes
     end
 
     BusRouteTrack.create(gml_id: curve_id, coordinates: coordinates)
+    print '.'
   end
+  puts
 
   doc_routes.elements.each('ksj:Dataset/ksj:BusRoute') do | element |
-    puts gml_id = element.attributes['gml:id']
+    gml_id = element.attributes['gml:id']
     bus_type = element.elements['ksj:bsc'].text.to_i
     operation_company = element.elements['ksj:boc'].text
     line_name = element.elements['ksj:bln'].text
@@ -66,36 +70,33 @@ def load_bus_route_tracks_and_bus_routes
     holiday_rate = element.elements['ksj:rph'].text
     note = element.elements['ksj:rmk'].text
 
-    BusRoute.uncached do
-      bus_route = BusRoute.find_or_create_by(
-        bus_type: bus_type,
-        operation_company: operation_company,
-        line_name: line_name,
-        weekday_rate: weekday_rate,
-        saturday_rate: saturday_rate,
-        holiday_rate: holiday_rate,
-        note: note
-      )
+    bus_route = BusRoute.find_or_create_by(
+      bus_type: bus_type,
+      operation_company: operation_company,
+      line_name: line_name,
+      weekday_rate: weekday_rate,
+      saturday_rate: saturday_rate,
+      holiday_rate: holiday_rate,
+      note: note
+    )
 
-      BusRouteInformation.uncached do
-        bus_route_information = BusRouteInformation.find_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
-        bus_route_information.bus_route = bus_route if bus_route_information
-      end
+    bus_route_information = BusRouteInformation.find_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
+    bus_route_information.bus_route = bus_route if bus_route_information
 
-      curve_id = element.elements['ksj:brt/@xlink:href'].value.remove '#'
-      
-      BusRouteTrack.uncached do
-        bus_route_track = BusRouteTrack.find_by(gml_id: curve_id)
-        bus_route.bus_route_tracks << bus_route_track if bus_route_track
-      end
-    end
+    curve_id = element.elements['ksj:brt/@xlink:href'].value.remove '#'
+
+    bus_route_track = BusRouteTrack.find_by(gml_id: curve_id)
+    bus_route.bus_route_tracks << bus_route_track if bus_route_track
+    print '.'
   end
+  puts
 end
 
 ActiveRecord::Base.transaction do
-  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+  GC::Profiler.enable
   load_bus_stops_and_bus_route_informations
-  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+  GC::Profiler.report
   load_bus_route_tracks_and_bus_routes
-  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+  GC::Profiler.report
+  pp GC.stat
 end
