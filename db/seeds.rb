@@ -18,7 +18,7 @@ def load_bus_stops_and_bus_route_informations
   doc_bus_stops.elements.each('ksj:Dataset/gml:Point') do | element |
     point_id = element.attributes['gml:id']
     point_hash[point_id] = element.elements['gml:pos'].text
-    print '.'
+    print "#{point_id}\r"
   end
   puts
 
@@ -37,7 +37,7 @@ def load_bus_stops_and_bus_route_informations
 
       BusRouteInformation.find_or_create_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name).bus_stops << bus_stop
     end
-    print '.'
+    print "#{gml_id}\r"
   end
   puts
 end
@@ -56,7 +56,7 @@ def load_bus_route_tracks_and_bus_routes
     end
 
     BusRouteTrack.create(gml_id: curve_id, coordinates: coordinates)
-    print '.'
+    print "#{curve_id}\r"
   end
   puts
 
@@ -87,7 +87,7 @@ def load_bus_route_tracks_and_bus_routes
 
     bus_route_track = BusRouteTrack.find_by(gml_id: curve_id)
     bus_route.bus_route_tracks << bus_route_track if bus_route_track
-    print '.'
+    print "#{gml_id}\r"
   end
   puts
 end
@@ -95,7 +95,6 @@ end
 ActiveRecord::Base.transaction do
   GC::Profiler.enable
   load_bus_stops_and_bus_route_informations
-  GC::Profiler.report
   load_bus_route_tracks_and_bus_routes
   GC::Profiler.report
   pp GC.stat
