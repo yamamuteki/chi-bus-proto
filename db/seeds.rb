@@ -84,9 +84,11 @@ def load_bus_route_tracks_and_bus_routes
 end
 
 ActiveRecord::Base.transaction do
-  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
-  load_bus_stops_and_bus_route_informations
-  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
-  load_bus_route_tracks_and_bus_routes
-  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+  ActiveRecord::Base.uncached do
+    puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+    load_bus_stops_and_bus_route_informations
+    puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+    load_bus_route_tracks_and_bus_routes
+    puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+  end
 end
