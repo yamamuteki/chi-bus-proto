@@ -7,26 +7,25 @@
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
 require 'rexml/document'
+require 'objspace'
 
 ActiveRecord::Base.transaction do
 
   # Load BusStop & BusRouteInformation
-  doc = REXML::Document.new(open("db/P11-10_12-jgd-g.xml"))
+  doc_bus_stops = REXML::Document.new(open("db/P11-10_12-jgd-g.xml"))
 
-  hash = {}
+  point_hash = {}
 
-  doc.elements.each('ksj:Dataset/gml:Point') do | element |
+  doc_bus_stops.elements.each('ksj:Dataset/gml:Point') do | element |
     puts point_id = element.attributes['gml:id']
-    hash[point_id] = element.elements['gml:pos'].text
+    point_hash[point_id] = element.elements['gml:pos'].text
   end
 
-  bus_route_info_hash = {}
-
-  doc.elements.each('ksj:Dataset/ksj:BusStop') do | element |
+  doc_bus_stops.elements.each('ksj:Dataset/ksj:BusStop') do | element |
     name = element.elements['ksj:busStopName'].text
     puts gml_id = element.attributes['gml:id']
     point_id = element.elements['ksj:position/@xlink:href'].value.remove '#'
-    pos = hash[point_id]
+    pos = point_hash[point_id]
 
     bus_stop = BusStop.create(name: name, gml_id: gml_id, latitude: pos.split[0], longitude: pos.split[1] )
     
@@ -35,34 +34,32 @@ ActiveRecord::Base.transaction do
       operation_company = info.elements['ksj:busOperationCompany'].text
       line_name = info.elements['ksj:busLineName'].text
 
-      bus_route_information = bus_route_info_hash[[bus_type, operation_company, line_name]] || BusRouteInformation.new(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
-      bus_route_info_hash[[bus_type, operation_company, line_name]] = bus_route_information
-
-      bus_stop.bus_route_informations << bus_route_information
+      bus_route_information = BusRouteInformation.find_or_create_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
+      bus_stop.bus_route_informations << bus_route_information if bus_route_information
     end
   end
 
+  puts "#{ObjectSpace.memsize_of_all} byte"
+  doc_bus_stops = nil
+  puts "#{ObjectSpace.memsize_of_all} byte"
+
   # Load BusRouteTrack & BusRoute
-  doc_route = REXML::Document.new(open("db/N07-11_12.xml"))
+  doc_routes = REXML::Document.new(open("db/N07-11_12.xml"))
 
-  bus_route_track_hash = {}
-
-  doc_route.elements.each('ksj:Dataset/gml:Curve') do | element |
+  doc_routes.elements.each('ksj:Dataset/gml:Curve') do | element |
     puts curve_id = element.attributes['gml:id']
-    point_list = element.elements['gml:segments/gml:LineStringSegment/gml:posList'].text
+    point_list = element.elements['gml:segments/gml:LineStringSegment/gml:posList'].text.strip
 
     coordinates = []
-    point_list.strip.lines do |line|
+    point_list.lines do |line|
       line.strip!
       coordinates << {latitude: line.split[0], longitude: line.split[1]}
     end
 
-    bus_route_track_hash[curve_id] = BusRouteTrack.create(gml_id: curve_id, coordinates: coordinates)
+    BusRouteTrack.create(gml_id: curve_id, coordinates: coordinates)
   end
 
-  bus_route_hash = {}
-
-  doc_route.elements.each('ksj:Dataset/ksj:BusRoute') do | element |
+  doc_routes.elements.each('ksj:Dataset/ksj:BusRoute') do | element |
     puts gml_id = element.attributes['gml:id']
     bus_type = element.elements['ksj:bsc'].text.to_i
     operation_company = element.elements['ksj:boc'].text
@@ -72,23 +69,23 @@ ActiveRecord::Base.transaction do
     holiday_rate = element.elements['ksj:rph'].text
     note = element.elements['ksj:rmk'].text
 
-    bus_route = bus_route_hash[[bus_type, operation_company, line_name]] || 
-      BusRoute.create(
-        bus_type: bus_type,
-        operation_company: operation_company,
-        line_name: line_name,
-        weekday_rate: weekday_rate,
-        saturday_rate: saturday_rate,
-        holiday_rate: holiday_rate,
-        note: note
-      )
-    bus_route_hash[[bus_type, operation_company, line_name]] = bus_route
+    bus_route = BusRoute.find_or_create_by(
+      bus_type: bus_type,
+      operation_company: operation_company,
+      line_name: line_name,
+      weekday_rate: weekday_rate,
+      saturday_rate: saturday_rate,
+      holiday_rate: holiday_rate,
+      note: note
+    )
 
-    bus_route_information = bus_route_info_hash[[bus_type, operation_company, line_name]] || BusRouteInformation.new(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
+    bus_route_information = BusRouteInformation.find_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
     bus_route_information.bus_route = bus_route if bus_route_information
 
     curve_id = element.elements['ksj:brt/@xlink:href'].value.remove '#'
-    bus_route.bus_route_tracks << bus_route_track_hash[curve_id]
+    bus_route_track = BusRouteTrack.find_by(gml_id: curve_id)
+    bus_route.bus_route_tracks << bus_route_track if bus_route_track
   end
-
+  
+  puts "#{ObjectSpace.memsize_of_all} byte"
 end
