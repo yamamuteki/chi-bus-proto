@@ -9,9 +9,7 @@
 require 'rexml/document'
 require 'objspace'
 
-ActiveRecord::Base.transaction do
-
-  # Load BusStop & BusRouteInformation
+def load_bus_stops_and_bus_route_informations
   doc_bus_stops = REXML::Document.new(open("db/P11-10_12-jgd-g.xml"))
 
   point_hash = {}
@@ -38,13 +36,9 @@ ActiveRecord::Base.transaction do
       bus_stop.bus_route_informations << bus_route_information if bus_route_information
     end
   end
+end
 
-  puts "#{ObjectSpace.memsize_of_all} byte"
-  doc_bus_stops = nil
-  GC.start
-  puts "#{ObjectSpace.memsize_of_all} byte"
-
-  # Load BusRouteTrack & BusRoute
+def load_bus_route_tracks_and_bus_routes
   doc_routes = REXML::Document.new(open("db/N07-11_12.xml"))
 
   doc_routes.elements.each('ksj:Dataset/gml:Curve') do | element |
@@ -87,6 +81,12 @@ ActiveRecord::Base.transaction do
     bus_route_track = BusRouteTrack.find_by(gml_id: curve_id)
     bus_route.bus_route_tracks << bus_route_track if bus_route_track
   end
-  
-  puts "#{ObjectSpace.memsize_of_all} byte"
+end
+
+ActiveRecord::Base.transaction do
+  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+  load_bus_stops_and_bus_route_informations
+  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+  load_bus_route_tracks_and_bus_routes
+  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
 end
