@@ -41,6 +41,7 @@ ActiveRecord::Base.transaction do
 
   puts "#{ObjectSpace.memsize_of_all} byte"
   doc_bus_stops = nil
+  GC.start
   puts "#{ObjectSpace.memsize_of_all} byte"
 
   # Load BusRouteTrack & BusRoute
