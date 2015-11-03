@@ -32,8 +32,10 @@ def load_bus_stops_and_bus_route_informations
       operation_company = info.elements['ksj:busOperationCompany'].text
       line_name = info.elements['ksj:busLineName'].text
 
-      bus_route_information = BusRouteInformation.find_or_create_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
-      bus_stop.bus_route_informations << bus_route_information if bus_route_information
+      BusRouteInformation.uncached do
+        bus_route_information = BusRouteInformation.find_or_create_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
+        bus_stop.bus_route_informations << bus_route_information if bus_route_information
+      end
     end
   end
 end
@@ -64,31 +66,36 @@ def load_bus_route_tracks_and_bus_routes
     holiday_rate = element.elements['ksj:rph'].text
     note = element.elements['ksj:rmk'].text
 
-    bus_route = BusRoute.find_or_create_by(
-      bus_type: bus_type,
-      operation_company: operation_company,
-      line_name: line_name,
-      weekday_rate: weekday_rate,
-      saturday_rate: saturday_rate,
-      holiday_rate: holiday_rate,
-      note: note
-    )
+    BusRoute.uncached do
+      bus_route = BusRoute.find_or_create_by(
+        bus_type: bus_type,
+        operation_company: operation_company,
+        line_name: line_name,
+        weekday_rate: weekday_rate,
+        saturday_rate: saturday_rate,
+        holiday_rate: holiday_rate,
+        note: note
+      )
 
-    bus_route_information = BusRouteInformation.find_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
-    bus_route_information.bus_route = bus_route if bus_route_information
+      BusRouteInformation.uncached do
+        bus_route_information = BusRouteInformation.find_by(bus_type: bus_type, operation_company: operation_company, line_name: line_name)
+        bus_route_information.bus_route = bus_route if bus_route_information
+      end
 
-    curve_id = element.elements['ksj:brt/@xlink:href'].value.remove '#'
-    bus_route_track = BusRouteTrack.find_by(gml_id: curve_id)
-    bus_route.bus_route_tracks << bus_route_track if bus_route_track
+      curve_id = element.elements['ksj:brt/@xlink:href'].value.remove '#'
+      
+      BusRouteTrack.uncached do
+        bus_route_track = BusRouteTrack.find_by(gml_id: curve_id)
+        bus_route.bus_route_tracks << bus_route_track if bus_route_track
+      end
+    end
   end
 end
 
 ActiveRecord::Base.transaction do
-  ActiveRecord::Base.uncached do
-    puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
-    load_bus_stops_and_bus_route_informations
-    puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
-    load_bus_route_tracks_and_bus_routes
-    puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
-  end
+  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+  load_bus_stops_and_bus_route_informations
+  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
+  load_bus_route_tracks_and_bus_routes
+  puts ObjectSpace.memsize_of_all.to_s(:delimited) + " byte"
 end
