@@ -50,7 +50,7 @@ group :development do
 end
 
 gem 'nokogiri'
-gem 'rails4-autocomplete'
+gem 'rails4-autocomplete', github: 'peterwillcn/rails4-autocomplete'
 
 # Support build on Windows.
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
