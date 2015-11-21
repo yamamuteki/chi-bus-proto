@@ -1,11 +1,11 @@
 <%= form_for @bus_stop_search, url: "/bus_stops", method: :get, remote: true, class: "form-inline" do |f| %>
 	<div class="input-group">
 		<div id="error">
-			<%= f.text_field :keyword, class: "form-control", placeholder: "バス停名を入力してください" %>
+      <%= f.autocomplete_field :keyword, autocomplete_bus_stop_name_home_index_path , class: "form-control", placeholder: "バス停名を入力してください" %>
 		</div>
 		<span class="input-group-btn">
 			<button class="btn btn-primary">
-  			<i class="glyphicon glyphicon-search"></i>
+        <i class="glyphicon glyphicon-search"></i>
 			</button>
 		</span>
 	</div>

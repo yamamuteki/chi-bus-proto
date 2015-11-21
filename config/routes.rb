@@ -2,7 +2,9 @@ Rails.application.routes.draw do
 
   root 'home#index'
 
-  get 'home/index'
+  resources :home, only: :index do
+    get :autocomplete_bus_stop_name, on: :collection
+  end
 
   resources :bus_stops, only: :index
 
