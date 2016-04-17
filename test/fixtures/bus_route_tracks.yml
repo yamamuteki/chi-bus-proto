@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  gml_id: MyString
+  coordinates: MyString
+  bus_route: 
+
+two:
+  gml_id: MyString
+  coordinates: MyString
+  bus_route: 
